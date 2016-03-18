@@ -1,27 +1,32 @@
 'use strict';
 
-var path = require("path");
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var SvgStore = require('webpack-svgstore-plugin');
-var HandlebarsPlugin = require("handlebars-webpack-plugin");
+let path = require("path");
+let ExtractTextPlugin = require('extract-text-webpack-plugin');
+let SvgStore = require('webpack-svgstore-plugin');
+let HandlebarsPlugin = require("handlebars-webpack-plugin");
 
 module.exports = {
     context: __dirname + "/app",
     entry: {
-        all: './main.js'
+        all: './main'
     },
 
     output: {
-        path: __dirname + '/dist/local/assets',
+        path: __dirname + '/server',
         publicPath: '/',
-        filename: './js/[name].js'
+        filename: '[name].js'
     },
 
     module: {
         loaders: [
             {
+                test: /\.js$/,
+                include: __dirname + '/app',
+                loader: 'babel-loader?presets[]=es2015'
+            },
+            {
                 test: /\.scss$/,
-                loader: ExtractTextPlugin.extract(['css', 'autoprefixer-loader', 'resolve-url', 'sass'])
+                loader: ExtractTextPlugin.extract('style', 'css!autoprefixer-loader!resolve-url!sass')
             },
             {
                 test: /\.(jpg|jpeg|gif|png)$/,
@@ -38,7 +43,7 @@ module.exports = {
     },
 
     plugins: [
-        new ExtractTextPlugin("./css/main.css", {allChunks: true}),
+        new ExtractTextPlugin("./main.css", {allChunks: true, disable: process.env.NODE_ENV=="development"}),
         new SvgStore(path.join(__dirname + '/app/local/assets/images', 'svg', '**/*.svg'), path.join('./images', 'svg'), {
             name: '[hash].svg',
             chunk: 'app',
@@ -47,11 +52,14 @@ module.exports = {
         new HandlebarsPlugin({
             entry: path.join(process.cwd(), "app", "templates", "home.hbs"),
 
-            output: path.join(process.cwd(), "dist", "html", "home.html"),
+            output: path.join(process.cwd(), "server", "index.html"),
             partials: [
                 path.join(process.cwd(), "app", "templates", "partials", "*", "*.hbs")
             ]
         })
+    ],
 
-    ]
+    devServer: {
+        contentBase: __dirname + '/server'
+    }
 };

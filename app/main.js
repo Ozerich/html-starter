@@ -1,1 +1,3 @@
-require('./local/assets/css/style.scss');
+'use strict';
+
+import './local/assets/css/style.scss';
