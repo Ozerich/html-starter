@@ -1,0 +1,42 @@
+$fonts_dir: '../fonts/';
+
+@mixin font($family, $name) {
+  $font_file_path: $fonts_dir + $family;
+
+  @font-face {
+    font-family: $name;
+    src: url($font_file_path + '.eot');
+    src: url($font_file_path + '.eot?#iefix') format('embedded-opentype'),
+    url($font_file_path + '.woff') format('woff'),
+    url($font_file_path + '.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+}
+
+@mixin font-mixin($font_name) {
+  font-family: "#{$font_name}", Arial, sans-serif;
+  font-weight: normal;
+  font-style: normal;
+}
+
+@mixin light() {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 300;
+}
+@mixin regular() {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 400;
+}
+@mixin semibold() {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 600;
+}
+@mixin bold() {
+  font-family: 'Ubuntu', sans-serif;
+  font-weight: 700;
+}
+@mixin exbold() {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 800;
+}

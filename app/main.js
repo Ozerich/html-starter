@@ -1,0 +1,1 @@
+require('./local/assets/css/style.scss');
