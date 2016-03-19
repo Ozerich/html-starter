@@ -14,9 +14,9 @@ module.exports = {
     },
 
     output: {
-        path: NODE_ENV == 'development' ? __dirname + '/server' : __dirname + '/dist/local/assets',
+        path: NODE_ENV == 'development' ? __dirname + '/server' : __dirname + '/dist/web',
         publicPath: '/',
-        filename: NODE_ENV == 'development' ? '[name].js' : './js/[name].js'
+        filename: NODE_ENV == 'development' ? './[name].js' : './js/[name].js'
     },
 
     module: {
@@ -45,8 +45,11 @@ module.exports = {
     },
 
     plugins: [
-        new ExtractTextPlugin( NODE_ENV == 'development' ? "./main.css" : './css/main.css', {allChunks: true, disable: NODE_ENV == 'development'}),
-        new SvgStore(path.join(__dirname + '/app/local/assets/images', 'svg', '**/*.svg'), path.join('./images', 'svg'), {
+        new ExtractTextPlugin('./css/main.css', {
+            allChunks: true,
+            disable: NODE_ENV == 'development'
+        }),
+        new SvgStore(path.join(__dirname + '/app/web/images', 'svg', '**/*.svg'), path.join('./images', 'svg'), {
             name: '[hash].svg',
             chunk: 'app',
             prefix: 'icon-'

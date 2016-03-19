@@ -1,3 +1,3 @@
 'use strict';
 
-import './local/assets/css/style.scss';
+import './web/css/style.scss';
