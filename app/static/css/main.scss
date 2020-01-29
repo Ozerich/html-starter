@@ -1,18 +1,17 @@
-@import 'imports';
+@import 'config/index';
+@import 'mixins/index';
+@import 'core/index';
 
+@import '~swiper/css/swiper';
+
+@import 'layout/page';
 @import 'layout/header';
 @import 'layout/footer';
-@import 'layout/popup';
-@import 'layout/wrapper';
 
-@import 'ui/buttons';
-@import 'ui/form';
+@import "popups/base";
 
-@import 'components/dropdown';
+@import 'components/buttons';
+@import 'components/form';
 @import 'components/radio';
 @import 'components/checkbox';
 @import 'components/loader';
-
-@import 'blocks/btn-list';
-
-@import 'pages/ui-toolkit';

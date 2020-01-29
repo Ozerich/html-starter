@@ -4,6 +4,7 @@
   "tmpPath": ".tmp",
   "sourcePath": "app",
   "destPath": "dist",
+  "dbPath": "db",
   "hbsPath": "templates",
   "staticPath": "static",
   "stylesPath": "static/css",
@@ -15,15 +16,10 @@
   "svgInlinePath": "static/svg/inline",
   "contentPath": "content",
   "metaPath": ".meta",
-  "concatScripts": false,
-  "cssMin": false,
-  "imagemin": false,
+  "dynamicEntry": false,
+  "jsMin": true,
+  "cssMin": true,
+  "imageMin": true,
   "criticalCss": false,
-  "babel": true,
-  "concatFilePath": "",
-  "supportJsLibs": [
-    "./node_modules/html5shiv/dist/html5shiv.js",
-    "./node_modules/jquery/dist/jquery.js",
-    "./node_modules/svg4everybody/dist/svg4everybody.js"
-  ]
+  "babel": true
 }

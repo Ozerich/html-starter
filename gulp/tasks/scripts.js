@@ -1,64 +1,113 @@
 module.exports = () => {
-  $.gulp.task('scripts:libs', () => {
-    return $.gulp
-      .src($.config.supportJsLibs)
-      .pipe($.gulpPlugin.concat('support-libs.js'))
-      .pipe($.gulp.dest($.config.tmpPath + '/' + $.config.staticPath + '/js/'))
-  })
+  const sourcePath = `${$.config.sourcePath}/${$.config.staticPath}/js`;
+  const destPath = `${$.config.outputPath}/${$.config.staticPath}/js`;
+  const outputFileName = $.config.dynamicEntry && $.config.buildMode === 'prod' ?
+    '[name]' : '[name].js';
 
-  $.gulp.task('scripts', () => {
-    if ($.config.babel && $.argv._[0] === 'build') {
-      return $.gulp
-        .src(['./' + $.config.sourcePath + '/' + $.config.staticPath + '/js/**'])
-        .pipe(
-          $.gulpPlugin.babel({
-            ignore: [`./${$.config.sourcePath}/${$.config.staticPath}/js/libs/**`],
-          }),
-        )
-        .on('error', function(err) {
-          console.log('[Compilation Error]')
-          console.log(err.fileName + (err.loc ? `( ${err.loc.line}, ${err.loc.column} ): ` : ': '))
-          console.log('error Babel: ' + err.message + '\n')
-          console.log(err.codeFrame)
+  const sourceMapConfig = {
+    filename: `${outputFileName}.map`,
+    exclude: /vendors\.js/,
+  };
+  const minifyConfig = {
+    parallel: true,
+    terserOptions: {
+      output: {
+        comments: false,
+      },
+    },
+    extractComments: false,
+  };
+  const babelConfig = {
+    test: /\.js$/,
+    exclude: [/node_modules[\/\\](?!(swiper|dom7)[\/\\])/, /vendors\.js/],
+    use: {
+      loader: 'babel-loader',
+      options: {
+        presets: ['@babel/preset-env'],
+      },
+    },
+  };
 
-          this.emit('end')
-        })
-        .pipe($.gulp.dest($.config.tmpPath + '/' + $.config.staticPath + '/js/'))
-        .pipe($.bs.reload({ stream: true }))
-    }
-    return $.gulp
-      .src(['./' + $.config.sourcePath + '/' + $.config.staticPath + '/js/**'])
-      .pipe($.gulp.dest($.config.tmpPath + '/' + $.config.staticPath + '/js/'))
-      .pipe($.bs.reload({ stream: true }))
-  })
+  const config = {
+    output: {
+      filename: `${outputFileName}`,
+      path: $.path.resolve(`${destPath}/`),
+    },
+    module: {
+      rules: [],
+    },
+    plugins: [],
+    optimization: {
+      minimizer: [],
+    },
+    stats: 'errors-warnings',
+  };
 
-  $.gulp.task('prepareJs', () => {
-    const buildPath = $.config.destPath + '/' + $.config.scriptsPath + '/'
+  switch ($.config.buildMode) {
+    case 'dev':
+      config.mode = 'development';
+      config.entry = getStaticEntry();
+      config.module.rules.push(
+        babelConfig,
+      );
+      config.plugins.push(
+        new $.webpack.SourceMapDevToolPlugin(sourceMapConfig),
+      );
+      minifyConfig.test = /vendors\.js/;
+      config.optimization.minimize = true;
+      config.optimization.minimizer.push(
+        new $.wpTerserPlugin(minifyConfig),
+      );
+      break;
+    case 'prod':
+      config.mode = 'production';
 
-    if (!$.config.concatScripts) {
-      return $.gulp.src($.config.tmpPath + '/' + $.config.scriptsPath + '/**/*').pipe($.gulp.dest(buildPath))
-    }
+      if ($.config.dynamicEntry) {
+        config.entry = getDynamicEntry();
+      } else {
+        config.entry = getStaticEntry();
+      }
 
-    return $.gulpPlugin
-      .domSrc({
-        file: $.config.concatFilePath
-          ? $.config.tmpPath + '/html/' + $.config.concatFilePath
-          : $.config.tmpPath + '/html/home.html',
-        selector: 'script',
-        attribute: 'src',
-      })
-      .pipe(
-        $.gulpPlugin.babel({
-          ignore: [
-            `./${$.config.sourcePath}/${$.config.staticPath}/js/libs/**`,
-            `./${$.config.sourcePath}/${$.config.staticPath}/support-libs.js`,
-          ],
-        }),
-      )
-      .pipe($.gulpPlugin.concat('all.js'))
-      .pipe($.gulp.dest(buildPath))
-      .pipe($.gulpPlugin.uglify())
-      .pipe($.gulpPlugin.rename('all.min.js'))
-      .pipe($.gulp.dest(buildPath))
-  })
-}
+      if ($.config.babel) {
+        config.module.rules.push(
+          babelConfig,
+        );
+      }
+
+      if ($.config.jsMin) {
+        minifyConfig.test = /\.js$/;
+      } else {
+        minifyConfig.test = /vendors\.js/;
+      }
+      config.optimization.minimize = true;
+      config.optimization.minimizer.push(
+        new $.wpTerserPlugin(minifyConfig),
+      );
+  }
+
+  $.gulp.task('scripts', done => {
+    return $.gulp.src(`${sourcePath}/**`).pipe($.webpackStream(
+      config, $.webpack,
+    )).pipe($.gulp.dest(`${destPath}/`)).pipe($.bs.reload({ stream: true })).on('end', done);
+  });
+
+  function getDynamicEntry () {
+    return $.glob.sync(
+      `${sourcePath}/**/*`, {
+        ignore: [`${sourcePath}/main.js`, `${sourcePath}/polyfills.js`],
+        nodir: true,
+      },
+    ).reduce((acc, path) => {
+      const entryPath = path.match(/([\w\d-_]+)\.js$/i)[0];
+      acc[entryPath] = $.path.resolve(path);
+      return acc;
+    }, {});
+  }
+
+  function getStaticEntry () {
+    return {
+      vendors: $.path.resolve(`${sourcePath}/vendors.js`),
+      main: $.path.resolve(`${sourcePath}/main.js`),
+    };
+  }
+};

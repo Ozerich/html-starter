@@ -1,12 +1,16 @@
-<!-- build:scripts -->
-<script src="support-libs.js"></script>
+{{> helpers/script src="vendors" }}
 
-<script src="helpers/popups.js"></script>
-<script src="helpers/dropdown.js"></script>
-
-<script src="ui.js"></script>
-<!-- endbuild -->
+{{#if dynamicEntry}}
+  {{> helpers/script src="layout" }}
+  {{> helpers/script src="scroll-observer" }}
+  {{> helpers/script src="resize-observer" }}
+  {{> helpers/script src="scroll-control" }}
+  {{> helpers/script src="preloader" }}
+  {{> helpers/script src="popups" }}
+  {{> helpers/script src="app" }}
+{{else}}
+  {{> helpers/script src="main" }}
+{{/if}}
 
 </body>
-
 </html>

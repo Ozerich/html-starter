@@ -1,0 +1,21 @@
+.preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: #fff;
+  opacity: 1;
+  will-change: opacity;
+  z-index: 1000;
+
+  &.hide {
+    animation: preloader-out 1s ease-in-out forwards;
+  }
+}
+
+@keyframes preloader-out {
+  to {
+    opacity: 0;
+  }
+}

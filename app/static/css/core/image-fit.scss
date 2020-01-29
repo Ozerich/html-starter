@@ -1,0 +1,15 @@
+.image-fit {
+  &.is-contain {
+    img {
+      object-fit: contain;
+      font-family: "object-fit: contain";
+    }
+  }
+
+  &.is-cover {
+    img {
+      object-fit: cover;
+      font-family: "object-fit: cover";
+    }
+  }
+}
